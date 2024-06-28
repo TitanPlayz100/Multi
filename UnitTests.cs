@@ -50,6 +50,9 @@ public class UnitTests
         bool[] tests = new bool[] {
 
             Algorithms.LinearSearch(1) == 1,
+            Algorithms.BMIcalculator(1, 1) == "Skinny",
+            Algorithms.LinearSort(new int[] { 1, 2, 3 }) == new int[] { 1, 2, 3 },
+            Algorithms.SortingAlgorithmFast(new int[] { 3, 2, 1 }) == new int[] { 1, 2, 3 }
 
         };
 

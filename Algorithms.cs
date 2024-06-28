@@ -23,7 +23,7 @@ public class Algorithms
     {
         "[0] Back",
         "[1] Linear Search",
-        "[2] O(1) Sorting Algorithm",
+        "[2] Fastest Sorting Algorithm",
         "[3] Linear sort",
         "[4] BMI Calculator",
         "[5] Tax Calculator",
