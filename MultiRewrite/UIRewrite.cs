@@ -1,41 +1,43 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 
-public class UI
+public class UI : ConsoleUI
 {
-    public Dictionary<string, UIPage> Pages = new Dictionary<string, UIPage>();
-    public UIPage currentPage;
-    public List<string> OpenPages = new List<string>();
-    public int MaxColumns;
+    public Dictionary<string, UIPage> Pages { get; set; }
+    public UIPage currentPage { get; set; }
+    public List<string> OpenPages { get; set; }
+    public int MaxColumns { get; set; }
+
+    public bool ended = false;
 
     public UI(string WindowTitle, int MaxColumns)
     {
         Console.Clear();
         Console.Title = WindowTitle;
         this.MaxColumns = MaxColumns;
+        Pages = new Dictionary<string, UIPage>();
+        OpenPages = new List<string>();
     }
 
-    public void CreatePage(string name, List<Option> options, bool BackButton = true)
+    public void CreatePage(string name, Dictionary<string, Action> selections, Options options = null)
     {
-        UIPage page = new UIPage(this, name);
-        if (!BackButton) page.removeOption(0);
-        page.SetOptionsList(options);
-        Pages.Add(name, page);
-    }
-
-    public void CreatePage(string name, Dictionary<string, Action> options, bool BackButton = true)
-    {
-        List<Option> optionList = new List<Option>();
-        foreach (var option in options)
+        if (options == null) options = new Options();
+        List<UISelection> selectList = new List<UISelection>();
+        foreach (var selection in selections)
         {
-            optionList.Add(new Option(option.Key, option.Value));
+            selectList.Add(new UISelection { name = selection.Key, function = selection.Value });
         }
-        CreatePage(name, optionList, BackButton);
+        UIPage page = new UIPage(this, name, options);
+        if (!options.HasBackButton) page.RemoveSelection(0);
+        page.SetSelections(selectList);
+        Pages.Add(name, page);
     }
 
     public void NavigatePage(string Page)
     {
+        if (ended) return;
         if (OpenPages.Contains(Page))
         {
             int Last = OpenPages.IndexOf(Page);
@@ -44,12 +46,9 @@ public class UI
                 ClosePage(i);
             }
             OpenPages.Remove(Page);
-            OpenPage(Page);
         }
-        else
-        {
-            OpenPage(Page);
-        }
+
+        OpenPage(Page);
     }
 
     public void NavigateBack()
@@ -59,6 +58,7 @@ public class UI
             NavigatePage(OpenPages[0]);
             return;
         }
+
         string Page = OpenPages.Contains("function")
             ? OpenPages[OpenPages.Count - 3]
             : OpenPages[OpenPages.Count - 2];
@@ -67,30 +67,42 @@ public class UI
 
     private void OpenPage(string Page)
     {
+        if (!Pages.ContainsKey(Page))
+        {
+            throw new Exception("Page does not exist");
+        }
         OpenPages.Remove("function");
-
         OpenPages.Add(Page);
         currentPage = Pages[Page];
 
-
-
-        Writer line = new Writer(this);
-        line.Out("<- " + Pages[Page].name + " ->", ConsoleColor.Cyan);
-
-        int index = 0;
-        foreach (Option option in Pages[Page].options)
+        // clear current column
+        Writer clearer = new UIWriter(this);
+        int gap = Console.WindowWidth / MaxColumns;
+        string EmptySpace = new string(' ', gap);
+        for (int row = 0; row < Console.WindowHeight - 1; row++)
         {
-            line.Out("[" + index + "] " + option.name);
+            clearer.Out(EmptySpace);
+        }
+
+        // title
+        Writer line = new UIWriter(this);
+        line.Out("<- " + Pages[Page].name + " ->", Pages[Page].options.titleColour);
+
+        // list out options
+        int index = 0;
+        foreach (UISelection selection in Pages[Page].selections)
+        {
+            line.Out("[" + index + "] " + selection.name);
             index++;
         }
 
-        int gap = Console.WindowWidth / MaxColumns;
+        // change how other columns look
         for (int i = 1; i < OpenPages.IndexOf(Page) + 1; i++)
         {
-            Writer titleChanger = new Writer(this, 0, i);
+            Writer titleChanger = new UIWriter(this, 0, i);
             titleChanger.Out(new string(' ', gap));
             titleChanger.row--;
-            titleChanger.Out(OpenPages[i-1], ConsoleColor.Cyan);
+            titleChanger.Out(OpenPages[i - 1], Pages[OpenPages[i - 1]].options.titleColour);
         }
 
         line.Select();
@@ -98,7 +110,7 @@ public class UI
 
     private void ClosePage(int index)
     {
-        Writer clearer = new Writer(this);
+        Writer clearer = new UIWriter(this);
         int gap = Console.WindowWidth / MaxColumns;
         string EmptySpace = new string(' ', gap);
         for (int row = 0; row < Console.WindowHeight - 1; row++)
@@ -107,61 +119,76 @@ public class UI
         }
         OpenPages.RemoveAt(index);
     }
+
+    public void ClearConsole()
+    {
+        ended = true;
+        Console.Clear();
+    }
 }
 
 public class UIPage
 {
     // name cannot be "function" (special word representing something else)
+    public List<UISelection> selections = new List<UISelection>();
+
+    public Options options;
+
     public string name;
-    public List<Option> options = new List<Option>();
-    public Writer line;
 
-    public UIPage(UI ui, string name)
+    public UIPage(ConsoleUI ui, string name, Options options)
     {
+        Writer lineWriter = new UIWriter(ui);
+        AddSelection("Back", () => { ui.NavigateBack(); });
+        this.options = options;
         this.name = name;
-        Writer lineWriter = new Writer(ui);
-        AddOption("Back", () => { ui.NavigateBack(); });
     }
 
-    public int AddOption(string name, Action function)
+    public int AddSelection(string name, Action function)
     {
-        Option option = new Option(name, function);
-        options.Add(option);
-        return options.Count - 1;
+        UISelection selection = new UISelection { name = name, function = function };
+        selections.Add(selection);
+        return selections.Count - 1;
     }
 
-    public void removeOption(int index)
+    public void RemoveSelection(int index)
     {
-        options.RemoveAt(index);
+        selections.RemoveAt(index);
     }
 
-    public void SetOptionsList(List<Option> options)
+    public void SetSelections(List<UISelection> options)
     {
-        this.options = this.options.Concat(options).ToList();
+        selections = selections.Concat(options).ToList();
     }
 }
 
-public class Option
+public class Options
 {
-    // name cannot be "back"
-    public string name;
-    public Action function;
+    public ConsoleColor titleColour { get; set; }
+    public bool HasBackButton { get; set; }
 
-    public Option(string name, Action function)
+    public Options()
     {
-        this.name = name;
-        this.function = function;
+        titleColour = ConsoleColor.Gray;
+        HasBackButton = true;
     }
 }
 
-public class Writer
+// name cannot be "back"
+public class UISelection
 {
-    public int row;
-    public int columnCoord;
-    private UI ui;
+    public string name { get; set; }
+    public Action function { get; set; }
+}
+
+public class UIWriter : Writer
+{
+    public int row { get; set; }
+    public int columnCoord { get; set; }
+    private ConsoleUI ui;
     private bool HasBadInput = false;
 
-    public Writer(UI ui, int StartRow = 0, int column = -1)
+    public UIWriter(ConsoleUI ui, int StartRow = 0, int column = -1)
     {
         row = StartRow;
         this.ui = ui;
@@ -197,14 +224,9 @@ public class Writer
         return nums.ToArray();
     }
 
-    public void Err(Action passedFunc)
+    public void Check(string message)
     {
-        if (HasBadInput)
-        {
-            Out("Invalid input.");
-            return;
-        }
-        passedFunc();
+        Out(HasBadInput ? "Invalid input." : message);
     }
 
     private int GetIntInput(int top)
@@ -229,29 +251,29 @@ public class Writer
         Console.SetCursorPosition(columnCoord, 0);
         var input = Console.ReadKey(true);
         string key = input.KeyChar.ToString();
-        int option = int.MinValue;
+        int selection = int.MinValue;
 
-        try { option = int.Parse(key); }
+        try { selection = int.Parse(key); }
         catch
         {
             HandleError("Error occured.");
         }
 
-        if (option < 0 || option >= ui.currentPage.options.Count)
+        if (selection < 0 || selection >= ui.currentPage.selections.Count)
         {
             HandleError("Invalid input.");
             return;
         }
 
-        if (ui.OpenPages.Count - 1 > ui.MaxColumns)
+        if (ui.OpenPages.Count > ui.MaxColumns)
         {
-            HandleError("Too many pages!");
+            HandleError("Too many pages, use Ctrl+C to end");
             return;
         }
 
         if (!ui.OpenPages.Contains("function")) ui.OpenPages.Add("function");
-        ui.currentPage.options[option].function();
-        Select();
+        ui.currentPage.selections[selection].function();
+        if (!((UI)ui).ended) Select();
     }
 
     private void HandleError(string message)
