@@ -14,31 +14,20 @@ public class UnitTests
 
     private static void OutputResult(string text, int passed, int total)
     {
-        if (passed == 0)
-        { // passed
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine(text + ": " + passed + "/" + total + " passed");
-            Console.ResetColor();
-        }
-        else
-        { // failed
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(text + ": " + passed + "/" + total + " passed");
-            Console.ResetColor();
-        }
+        Console.ForegroundColor = (passed == 0) ? ConsoleColor.Green : ConsoleColor.Red;
+        Console.WriteLine(text + ": " + passed + "/" + total + " passed");
+        Console.ResetColor();
     }
 
     public static int[] OperationTest()
     {
         bool[] tests = new bool[] {
-
-            MathematicalOperations.AddFunc(1, 2) == 3,
-            MathematicalOperations.SubtractFunc(4, 2) == 2,
-            MathematicalOperations.MultiplyFunc(1, 2) == 2,
-            MathematicalOperations.DivideFunc(4, 2) == 2,
-            MathematicalOperations.PythagorasFunc(1, 2, 3) == 3,
-            MathematicalOperations.MaxFunc(new int[] { 1, 2, 3 }) == 3
-
+            Operations.AddFunc(1, 2) == 3,
+            Operations.SubtractFunc(4, 2) == 2,
+            Operations.MultiplyFunc(1, 2) == 2,
+            Operations.DivideFunc(4, 2) == 2,
+            Operations.PythagorasFunc(1, 2, 3) == 3,
+            Operations.MaxFunc(new int[] { 1, 2, 3 }) == 3
         };
 
         // returns count of passed tests, and total tests in an array
@@ -48,12 +37,10 @@ public class UnitTests
     public static int[] AlgorithmsTest()
     {
         bool[] tests = new bool[] {
-
             Algorithms.LinearSearch(1) == 1,
-            Algorithms.BMIcalculator(1, 1) == "Skinny",
+            Algorithms.SortingAlgorithmFast(new int[] { 3, 2, 1 }) == new int[] { 1, 2, 3 },
             Algorithms.LinearSort(new int[] { 1, 2, 3 }) == new int[] { 1, 2, 3 },
-            Algorithms.SortingAlgorithmFast(new int[] { 3, 2, 1 }) == new int[] { 1, 2, 3 }
-
+            Algorithms.BMIcalculator(1, 1) == "Skinny",
         };
 
         // returns count of passed tests, and total tests in an array

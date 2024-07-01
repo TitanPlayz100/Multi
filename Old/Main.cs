@@ -56,7 +56,7 @@ public class Home
                 MathematicalOperations.OperationPage();
                 break;
             case 2:
-                Algorithms.SearchPage();
+                AlgorithmsOld.SearchPage();
                 break;
             default:
                 Console.WriteLine("Invalid number.");

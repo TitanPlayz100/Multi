@@ -4,7 +4,7 @@ using System.Linq;
 
 public class Multi
 {
-    private static string ASCII = @"
+    private static readonly string ASCII = @"
          __    __   __  __   __       ______  __
         /\ \-./  \ /\ \/\ \ /\ \     /\__  _\/\ \
         \ \ \-./\ \\ \ \_\ \\ \ \____\/_/\ \/\ \ \
@@ -14,10 +14,10 @@ public class Multi
 
     public static void Main()
     {
-        start();
+        Start();
     }
 
-    public static void start()
+    public static void Start()
     {
         // intro page
         ConsoleUI startUI = new UI("Multi", 1);
@@ -27,7 +27,7 @@ public class Multi
         startWriter.Out("Multiply: ");
         int result1 = startWriter.Get();
         startWriter.Out("with: ");
-        int result2 = startWriter.Get();;
+        int result2 = startWriter.Get();
         startWriter.Check("Answer: " + result1);
         startUI.ClearConsole();
 
@@ -48,7 +48,7 @@ public class Multi
         ui.CreatePage("Mathematical Operations", Operations.OperationsPage(ui), pageOptions);
 
         // Algorithms page
-        ui.CreatePage("Algorithms", AlgorithmsRewrite.AlgorithmsPage(ui), pageOptions);
+        ui.CreatePage("Algorithms", Algorithms.AlgorithmsPage(ui), pageOptions);
 
         // open first page
         ui.NavigatePage("Home");
@@ -143,7 +143,7 @@ public class Operations
     }
 }
 
-public class AlgorithmsRewrite
+public class Algorithms
 {
     public static Dictionary<string, Action> AlgorithmsPage(ConsoleUI ui)
     {
@@ -157,7 +157,7 @@ public class AlgorithmsRewrite
                 int result = LinearSearch(input);
                 line.Check("The value " + new Random(123).Next(100) + " exists at index " + result + ".");
             }},
-            {"Fastest Sorting Algorithm", () => {displayFastSearch(ui); }},
+            {"Fastest Sorting Algorithm", () => {DisplayFastSearch(ui); }},
             {"Linear sort", () => {
                 Writer line = new UIWriter(ui);
                 line.Out("Linear sort - The next best thing!");
@@ -189,7 +189,7 @@ public class AlgorithmsRewrite
         };
     }
 
-    public static void displayFastSearch(ConsoleUI ui)
+    public static void DisplayFastSearch(ConsoleUI ui)
     {
         Writer line = new UIWriter(ui);
         line.Out("O(1) Sorting Algorithm");
@@ -227,8 +227,6 @@ public class AlgorithmsRewrite
 
         return index;
     }
-
-    bool Maybe = false;
 
     public static int[] RandomNumberArray()
     {
@@ -274,6 +272,7 @@ public class AlgorithmsRewrite
         return unsortedArray.Reverse().ToArray();
     }
 
+    // self driving cars so cool
     void SelfDrivingCars()
     {
         if (GoingToCrash())
@@ -284,4 +283,6 @@ public class AlgorithmsRewrite
 
     bool GoingToCrash() { return Maybe; }
     void Dont() { }
+
+    bool Maybe = false;
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 /// <summary>
-/// The interface provides additional comments to each method for a better understanding. <br/>
+/// The interface provides additional comments and intellisense to each method for a better understanding. <br/>
 /// This class is used to create a console UI with multiple columns (pages) and write easily to each page
 /// </summary>
 public interface ConsoleUI

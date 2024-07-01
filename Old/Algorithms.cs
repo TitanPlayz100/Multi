@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-public class Algorithms
+public class AlgorithmsOld
 {
     private static Random RND = new Random();
 
