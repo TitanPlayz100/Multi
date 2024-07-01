@@ -3,10 +3,21 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 
-public class UI : ConsoleUI
+/// <summary>
+/// This provides additional comments and intellisense to each method for a better understanding. <br/>
+/// This class is used to create a console UI with multiple columns (pages) and write easily to each page
+/// </summary>
+public class UI
 {
+    /// <summary>
+    /// A dictionary of all the pages in the UI, the key is the name of the page
+    /// </summary>
     public Dictionary<string, UIPage> Pages { get; set; }
     public UIPage currentPage { get; set; }
+
+    /// <summary>
+    /// An list of all the pages opened in order of opening 
+    /// </summary>
     public List<string> OpenPages { get; set; }
     public int MaxColumns { get; set; }
     public bool ended { get; set; }
@@ -21,6 +32,11 @@ public class UI : ConsoleUI
         ended = false;
     }
 
+    /// <summary>
+    /// Create a page by providing a dictionary of selections that each page has, numbered in order of the dictionary.
+    /// <br/>
+    /// Can provide additional options for page like title colour and if it has a back button.
+    /// </summary>
     public void CreatePage(string name, Dictionary<string, Action> selections, Options options = null)
     {
         if (options == null) options = new Options();
@@ -35,6 +51,13 @@ public class UI : ConsoleUI
         Pages.Add(name, page);
     }
 
+    /// <summary>
+    /// Navigate to a specific page using its name.
+    /// <br/>
+    /// If page is not open it will be opened on the next column, otherwise it will be navigated to.
+    /// <br/>
+    /// If page is not found it will throw an error.
+    /// </summary>
     public void NavigatePage(string Page)
     {
         if (ended) return;
@@ -45,7 +68,7 @@ public class UI : ConsoleUI
         }
 
         currentPage = Pages[Page];
-        Writer line;
+        UIWriter line;
 
         if (OpenPages.Contains(Page)) // going back page(s)
         {
@@ -82,6 +105,9 @@ public class UI : ConsoleUI
 
     }
 
+    /// <summary>
+    /// Navigate back to the previous page, unless it is the first page
+    /// </summary>
     public void NavigateBack()
     {
         if (OpenPages.Count == 1)
@@ -98,7 +124,7 @@ public class UI : ConsoleUI
 
     public void ClearPage(int col)
     {
-        Writer clearer = new UIWriter(this, 0, col);
+        UIWriter clearer = new UIWriter(this, 0, col);
         int gap = Console.WindowWidth / MaxColumns;
         string EmptySpace = new string(' ', gap);
         for (int row = 0; row < Console.WindowHeight - 1; row++)
@@ -112,16 +138,16 @@ public class UI : ConsoleUI
         int gap = Console.WindowWidth / MaxColumns;
         for (int i = 1; i < OpenPages.IndexOf(curPage) + 1; i++)
         {
-            Writer titleChanger = new UIWriter(this, 0, i);
+            UIWriter titleChanger = new UIWriter(this, 0, i);
             titleChanger.Out(new string(' ', gap));
-            titleChanger.row--;
+            titleChanger.Row--;
             titleChanger.Out(OpenPages[i - 1], Pages[OpenPages[i - 1]].options.titleColour);
         }
     }
 
     private void ClosePage(int index)
     {
-        Writer clearer = new UIWriter(this);
+        UIWriter clearer = new UIWriter(this);
         int gap = Console.WindowWidth / MaxColumns;
         string EmptySpace = new string(' ', gap);
         for (int row = 0; row < Console.WindowHeight - 1; row++)
@@ -131,6 +157,9 @@ public class UI : ConsoleUI
         OpenPages.RemoveAt(index);
     }
 
+    /// <summary>
+    /// Clears the console and any further actions
+    /// </summary>
     public void ClearConsole()
     {
         ended = true;
@@ -147,9 +176,9 @@ public class UIPage
 
     public string name;
 
-    public UIPage(ConsoleUI ui, string name, Options options)
+    public UIPage(UI ui, string name, Options options)
     {
-        Writer lineWriter = new UIWriter(ui);
+        UIWriter lineWriter = new UIWriter(ui);
         AddSelection("Back", () => { ui.NavigateBack(); });
         this.options = options;
         this.name = name;
@@ -192,38 +221,53 @@ public class UISelection
     public Action function { get; set; }
 }
 
-public class UIWriter : Writer
+
+/// <summary>
+/// Provides a way to write text to the console in a specific column, and other QOL methods</br>
+/// Can use check method to check for bad input, and getlist to get a list of numbers
+/// </summary>
+public class UIWriter
 {
-    public int row { get; set; }
-    public int columnCoord { get; set; }
-    private ConsoleUI ui;
+    public int Row { get; set; }
+    public int ColumnCoord { get; set; }
+    private UI Ui;
     private bool HasBadInput = false;
 
-    public UIWriter(ConsoleUI ui, int StartRow = 0, int column = -1)
+    public UIWriter(UI ui, int StartRow = 0, int column = -1)
     {
-        row = StartRow;
-        this.ui = ui;
-        columnCoord = ConvertColumn((column == -1 ? ui.OpenPages.Count : column) - 1);
+        Row = StartRow;
+        Ui = ui;
+        ColumnCoord = ConvertColumn((column == -1 ? ui.OpenPages.Count : column) - 1);
     }
 
+    /// <summary>
+    /// Starts a new line and writes the text out, in the specified column of the instance
+    /// </summary>
     public void Out(string line, ConsoleColor colour = ConsoleColor.Gray)
     {
-        if (row >= Console.WindowHeight) row = 1;
-        Console.SetCursorPosition(columnCoord, row);
+        Console.SetCursorPosition(ColumnCoord, Row);
         Console.ForegroundColor = colour;
         Console.WriteLine(line);
         Console.ResetColor();
-        row++;
+        Row++;
+        if (Row > Console.WindowHeight) Row = 1;
     }
 
+    /// <summary>
+    /// Starts a new line and returns the users integer input after they press enter
+    /// </summary>
     public int Get(bool ignoreErr = false)
     {
-        row++;
-        int input = GetIntInput(row - 1);
+        Row++;
+        if (Row > Console.WindowHeight) Row = 1;
+        int input = GetIntInput(Row - 1);
         if (input == int.MinValue && !ignoreErr) HasBadInput = true;
         return input;
     }
 
+    /// <summary>
+    /// Starts a new line for each user input, until they input a non integer, and returns the array of integers
+    /// </summary>
     public int[] GetList()
     {
         List<int> nums = new List<int>();
@@ -236,6 +280,9 @@ public class UIWriter : Writer
         return nums.ToArray();
     }
 
+    /// <summary>
+    /// Will use Out method if there was no bad input, otherwise will output error message
+    /// </summary>
     public void Check(string message)
     {
         Out(HasBadInput ? "Invalid input." : message);
@@ -243,7 +290,7 @@ public class UIWriter : Writer
 
     private int GetIntInput(int top)
     {
-        Console.SetCursorPosition(columnCoord, top);
+        Console.SetCursorPosition(ColumnCoord, top);
         var input = Console.ReadLine();
         if (input == null) return int.MinValue;
         if (input == string.Empty) return int.MinValue;
@@ -258,9 +305,12 @@ public class UIWriter : Writer
         }
     }
 
+    /// <summary>
+    /// Waits for a user input, and runs the action associated with the integer pressed on the current page
+    /// </summary>
     public void Select()
     {
-        Console.SetCursorPosition(columnCoord, 0);
+        Console.SetCursorPosition(ColumnCoord, 0);
         var input = Console.ReadKey(true);
         string key = input.KeyChar.ToString();
         int selection = int.MinValue;
@@ -271,41 +321,41 @@ public class UIWriter : Writer
             HandleError("Error occured.");
         }
 
-        if (selection < 0 || selection >= ui.currentPage.selections.Count)
+        if (selection < 0 || selection >= Ui.currentPage.selections.Count)
         {
             HandleError("Invalid input.");
             return;
         }
 
-        if (ui.OpenPages.Count > ui.MaxColumns)
+        if (Ui.OpenPages.Count > Ui.MaxColumns)
         {
             HandleError("Too many pages, use Ctrl+C to end");
             return;
         }
 
 
-        if (!ui.OpenPages.Contains("function"))
+        if (!Ui.OpenPages.Contains("function"))
         {
-            ui.OpenPages.Add("function");
+            Ui.OpenPages.Add("function");
         }
         else
         {
-            ui.ClearPage(ui.OpenPages.Count);
+            Ui.ClearPage(Ui.OpenPages.Count);
         }
-        ui.currentPage.selections[selection].function();
-        if (!ui.ended) Select();
+        Ui.currentPage.selections[selection].function();
+        if (!Ui.ended) Select();
     }
 
     private void HandleError(string message)
     {
         Out(message);
-        row--;
+        Row--;
         Select();
     }
 
     private int ConvertColumn(int col)
     {
-        int gap = Console.WindowWidth / ui.MaxColumns;
+        int gap = Console.WindowWidth / Ui.MaxColumns;
         return col * gap;
     }
 }

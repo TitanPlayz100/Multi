@@ -17,24 +17,29 @@ public class Multi
         Start();
     }
 
+    public static int Intro()
+    {
+        UI startUI = new UI("Multi", 1);
+        UIWriter startUIWriter = new UIWriter(startUI, 0, 1);
+        startUIWriter.Out(ASCII, ConsoleColor.Green);
+        startUIWriter.Row = 6;
+        startUIWriter.Out("Multiply: ");
+        int result1 = startUIWriter.Get();
+        startUIWriter.Out("with: ");
+        int result2 = startUIWriter.Get();
+        startUI.ClearConsole();
+        return result1;
+    }
+
     public static void Start()
     {
-        // intro page
-        ConsoleUI startUI = new UI("Multi", 1);
-        Writer startWriter = new UIWriter(startUI, 0, 1);
-        startWriter.Out(ASCII, ConsoleColor.Green);
-        startWriter.row = 6;
-        startWriter.Out("Multiply: ");
-        int result1 = startWriter.Get();
-        startWriter.Out("with: ");
-        int result2 = startWriter.Get();
-        startWriter.Check("Answer: " + result1);
-        startUI.ClearConsole();
+        int result = Intro();
 
         // main page
-        ConsoleUI ui = new UI("Multi", 3);
-        Options mainOptions = new Options{titleColour = ConsoleColor.Cyan, HasBackButton = false};
-        Options pageOptions = new Options{titleColour = ConsoleColor.Red};
+        UI ui = new UI("Multi", 3);
+        
+        Options mainOptions = new Options { titleColour = ConsoleColor.Cyan, HasBackButton = false };
+        Options pageOptions = new Options { titleColour = ConsoleColor.Red };
 
         Dictionary<string, Action> selections = new Dictionary<string, Action>
         {
@@ -50,7 +55,9 @@ public class Multi
         // Algorithms page
         ui.CreatePage("Algorithms", Algorithms.AlgorithmsPage(ui), pageOptions);
 
-        // open first page
+        // show result and open first page
+        string res = result == int.MinValue ? "Invalid input." : result.ToString();
+        new UIWriter(ui, 0, 2).Out("Answer: " + res);
         ui.NavigatePage("Home");
 
     }
@@ -58,7 +65,7 @@ public class Multi
 
 public class Operations
 {
-    public static Dictionary<string, Action> OperationsPage(ConsoleUI ui)
+    public static Dictionary<string, Action> OperationsPage(UI ui)
     {
         return new Dictionary<string, Action>
         {
@@ -67,7 +74,7 @@ public class Operations
             {"Multiplication", () => { BasicOperation(ui, "Multiply"); }},
             {"Division", () => { BasicOperation(ui, "Divide"); }},
             {"Pythagoras", () => {
-                Writer line = new UIWriter(ui);
+                UIWriter line = new UIWriter(ui);
                 line.Out("Side a: ");
                 int a = line.Get();
                 line.Out("Side b: ");
@@ -80,9 +87,9 @@ public class Operations
         };
     }
 
-    public static void BasicOperation(ConsoleUI ui, string Operation)
+    public static void BasicOperation(UI ui, string Operation)
     {
-        Writer line = new UIWriter(ui);
+        UIWriter line = new UIWriter(ui);
         line.Out(Operation + ": ");
         int a = line.Get();
         if (Operation == "Add") line.Out("to: ");
@@ -145,12 +152,12 @@ public class Operations
 
 public class Algorithms
 {
-    public static Dictionary<string, Action> AlgorithmsPage(ConsoleUI ui)
+    public static Dictionary<string, Action> AlgorithmsPage(UI ui)
     {
         return new Dictionary<string, Action>
         {
             {"Linear Search", () => {
-                Writer line = new UIWriter(ui);
+                UIWriter line = new UIWriter(ui);
                 line.Out("Linear search");
                 line.Out("Input a search query: ");
                 int input = line.Get();
@@ -159,7 +166,7 @@ public class Algorithms
             }},
             {"Fastest Sorting Algorithm", () => {DisplayFastSearch(ui); }},
             {"Linear sort", () => {
-                Writer line = new UIWriter(ui);
+                UIWriter line = new UIWriter(ui);
                 line.Out("Linear sort - The next best thing!");
                 line.Out("Input array values seperated by enter: ");
                 int[] a = line.GetList();
@@ -167,7 +174,7 @@ public class Algorithms
                 line.Out(string.Join(", ", b));
             }},
             {"BMI Calculator", () => {
-                Writer line = new UIWriter(ui);
+                UIWriter line = new UIWriter(ui);
                 line.Out("Enter height: ");
                 int height = line.Get();
                 line.Out("Enter weight: ");
@@ -175,13 +182,13 @@ public class Algorithms
                 line.Check("Your status: " + BMIcalculator(height, weight));
             }},
             {"Tax Calculator", () => {
-                Writer line = new UIWriter(ui);
+                UIWriter line = new UIWriter(ui);
                 line.Out("Enter income: ");
                 int income = line.Get();
                 line.Check("Your tax is 0");
             }},
             {"ATAR Calculator", () => {
-                Writer line = new UIWriter(ui);
+                UIWriter line = new UIWriter(ui);
                 line.Out("Enter your rank: ");
                 int atar = line.Get();
                 line.Check("Your estimated ATAR is ? mark");
@@ -189,9 +196,9 @@ public class Algorithms
         };
     }
 
-    public static void DisplayFastSearch(ConsoleUI ui)
+    public static void DisplayFastSearch(UI ui)
     {
-        Writer line = new UIWriter(ui);
+        UIWriter line = new UIWriter(ui);
         line.Out("O(1) Sorting Algorithm");
         line.Out("Input array values seperated by enter: ");
         int[] a = line.GetList();
