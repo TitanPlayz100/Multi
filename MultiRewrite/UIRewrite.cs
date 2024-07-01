@@ -9,8 +9,7 @@ public class UI : ConsoleUI
     public UIPage currentPage { get; set; }
     public List<string> OpenPages { get; set; }
     public int MaxColumns { get; set; }
-
-    public bool ended = false;
+    public bool ended { get; set; }
 
     public UI(string WindowTitle, int MaxColumns)
     {
@@ -19,6 +18,7 @@ public class UI : ConsoleUI
         this.MaxColumns = MaxColumns;
         Pages = new Dictionary<string, UIPage>();
         OpenPages = new List<string>();
+        ended = false;
     }
 
     public void CreatePage(string name, Dictionary<string, Action> selections, Options options = null)
@@ -65,6 +65,19 @@ public class UI : ConsoleUI
         NavigatePage(Page);
     }
 
+    // add function to clear current column
+
+    public void ClearPage(int col)
+    {
+        Writer clearer = new UIWriter(this, 0, col);
+        int gap = Console.WindowWidth / MaxColumns;
+        string EmptySpace = new string(' ', gap);
+        for (int row = 0; row < Console.WindowHeight - 1; row++)
+        {
+            clearer.Out(EmptySpace);
+        }
+    }
+
     private void OpenPage(string Page)
     {
         if (!Pages.ContainsKey(Page))
@@ -75,14 +88,7 @@ public class UI : ConsoleUI
         OpenPages.Add(Page);
         currentPage = Pages[Page];
 
-        // clear current column
-        Writer clearer = new UIWriter(this);
-        int gap = Console.WindowWidth / MaxColumns;
-        string EmptySpace = new string(' ', gap);
-        for (int row = 0; row < Console.WindowHeight - 1; row++)
-        {
-            clearer.Out(EmptySpace);
-        }
+        ClearPage(OpenPages.Count);
 
         // title
         Writer line = new UIWriter(this);
@@ -97,6 +103,7 @@ public class UI : ConsoleUI
         }
 
         // change how other columns look
+        int gap = Console.WindowWidth / MaxColumns;
         for (int i = 1; i < OpenPages.IndexOf(Page) + 1; i++)
         {
             Writer titleChanger = new UIWriter(this, 0, i);
@@ -271,9 +278,17 @@ public class UIWriter : Writer
             return;
         }
 
-        if (!ui.OpenPages.Contains("function")) ui.OpenPages.Add("function");
+
+        if (!ui.OpenPages.Contains("function"))
+        {
+            ui.OpenPages.Add("function");
+        }
+        else
+        {
+            ui.ClearPage(ui.OpenPages.Count);
+        }
         ui.currentPage.selections[selection].function();
-        if (!((UI)ui).ended) Select();
+        if (!ui.ended) Select();
     }
 
     private void HandleError(string message)

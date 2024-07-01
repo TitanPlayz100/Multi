@@ -13,6 +13,8 @@ public interface ConsoleUI
     /// </summary>
     Dictionary<string, UIPage> Pages { get; set; }
 
+    bool ended { get; set; }
+
     UIPage currentPage { get; set; }
 
     /// <summary>
@@ -47,6 +49,8 @@ public interface ConsoleUI
     /// Clears the console and any further actions
     /// </summary>
     void ClearConsole();
+
+    void ClearPage(int col);
 }
 
 /// <summary>

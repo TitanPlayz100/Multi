@@ -7,7 +7,7 @@ public class UITest
     public static ConsoleUI ui;
     public static void Main()
     {
-        ui = new UI("test", 4);
+        ui = new UI("test", 8);
 
         // page options
         Options mainPageOptions = new Options { titleColour = ConsoleColor.Red, HasBackButton = false };
@@ -47,7 +47,7 @@ public class UITest
         ui.CreatePage("algorithmtest", algorithmSelections, pageOptions);
 
         // create loop of new pages
-        for (int i = 2; i < 5; i++)
+        for (int i = 2; i < 10; i++)
         {
             int next = i+1;
             Dictionary<string, Action> recursiveSelections = new Dictionary<string, Action> {
