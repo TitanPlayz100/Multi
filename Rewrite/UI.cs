@@ -38,17 +38,48 @@ public class UI : ConsoleUI
     public void NavigatePage(string Page)
     {
         if (ended) return;
-        if (OpenPages.Contains(Page))
+
+        if (!Pages.ContainsKey(Page))
+        {
+            throw new Exception("Page does not exist");
+        }
+
+        currentPage = Pages[Page];
+        Writer line;
+
+        if (OpenPages.Contains(Page)) // going back page(s)
         {
             int Last = OpenPages.IndexOf(Page);
             for (int i = OpenPages.Count - 1; i > Last; i--)
             {
                 ClosePage(i);
             }
-            OpenPages.Remove(Page);
+            // title
+            line = new UIWriter(this);
+            line.Out("<- " + Pages[Page].name + " ->", Pages[Page].options.titleColour);
+        }
+        else // open new page
+        {
+            OpenPages.Remove("function");
+            OpenPages.Add(Page);
+            ClearPage(OpenPages.Count);
+
+            // title
+            line = new UIWriter(this);
+            line.Out("<- " + Pages[Page].name + " ->", Pages[Page].options.titleColour);
+
+            // list out options
+            int index = 0;
+            foreach (UISelection selection in Pages[Page].selections)
+            {
+                line.Out("[" + index + "] " + selection.name);
+                index++;
+            }
         }
 
-        OpenPage(Page);
+        ChangeOtherCols(Page);
+        line.Select();
+
     }
 
     public void NavigateBack()
@@ -65,8 +96,6 @@ public class UI : ConsoleUI
         NavigatePage(Page);
     }
 
-    // add function to clear current column
-
     public void ClearPage(int col)
     {
         Writer clearer = new UIWriter(this, 0, col);
@@ -78,41 +107,16 @@ public class UI : ConsoleUI
         }
     }
 
-    private void OpenPage(string Page)
+    private void ChangeOtherCols(string curPage)
     {
-        if (!Pages.ContainsKey(Page))
-        {
-            throw new Exception("Page does not exist");
-        }
-        OpenPages.Remove("function");
-        OpenPages.Add(Page);
-        currentPage = Pages[Page];
-
-        ClearPage(OpenPages.Count);
-
-        // title
-        Writer line = new UIWriter(this);
-        line.Out("<- " + Pages[Page].name + " ->", Pages[Page].options.titleColour);
-
-        // list out options
-        int index = 0;
-        foreach (UISelection selection in Pages[Page].selections)
-        {
-            line.Out("[" + index + "] " + selection.name);
-            index++;
-        }
-
-        // change how other columns look
         int gap = Console.WindowWidth / MaxColumns;
-        for (int i = 1; i < OpenPages.IndexOf(Page) + 1; i++)
+        for (int i = 1; i < OpenPages.IndexOf(curPage) + 1; i++)
         {
             Writer titleChanger = new UIWriter(this, 0, i);
             titleChanger.Out(new string(' ', gap));
             titleChanger.row--;
             titleChanger.Out(OpenPages[i - 1], Pages[OpenPages[i - 1]].options.titleColour);
         }
-
-        line.Select();
     }
 
     private void ClosePage(int index)
@@ -204,6 +208,7 @@ public class UIWriter : Writer
 
     public void Out(string line, ConsoleColor colour = ConsoleColor.Gray)
     {
+        if (row >= Console.WindowHeight) row = 1;
         Console.SetCursorPosition(columnCoord, row);
         Console.ForegroundColor = colour;
         Console.WriteLine(line);
