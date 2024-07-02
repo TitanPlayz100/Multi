@@ -37,7 +37,7 @@ public class Multi
 
         // main page
         UI ui = new UI("Multi", 3);
-        
+
         Options mainOptions = new Options { titleColour = ConsoleColor.Cyan, HasBackButton = false };
         Options pageOptions = new Options { titleColour = ConsoleColor.Red };
 
@@ -46,6 +46,7 @@ public class Multi
             {"Exit", () => { Console.Clear(); Environment.Exit(0); }},
             {"Mathematical Operations", () => { ui.NavigatePage("Mathematical Operations"); }},
             {"Algorithms", () => { ui.NavigatePage("Algorithms"); }},
+            {"Calculators", () => { ui.NavigatePage("Calculators"); }}
         };
         ui.CreatePage("Home", selections, mainOptions);
 
@@ -54,6 +55,9 @@ public class Multi
 
         // Algorithms page
         ui.CreatePage("Algorithms", Algorithms.AlgorithmsPage(ui), pageOptions);
+
+        // calculators page
+        ui.CreatePage("Calculators", Calculators.CalculatorsPage(ui), pageOptions);
 
         // show result and open first page
         string res = result == int.MinValue ? "Invalid input." : result.ToString();
@@ -134,20 +138,6 @@ public class Operations
         int d = DivideFunc(AddFunc(MultiplyFunc(SubtractFunc(14142, 10000), a), MultiplyFunc(b, 10000)), 10000);
         return a;
     }
-
-    public static int MaxFunc(int[] numArray)
-    {
-        if (numArray.Length == 0) return 0;
-        int max = 0;
-        for (int i = 1; i < numArray.Length; i++)
-        {
-            if (numArray[i] > max)
-            {
-                max = numArray[i];
-            }
-        }
-        return numArray[0];
-    }
 }
 
 public class Algorithms
@@ -173,26 +163,20 @@ public class Algorithms
                 int[] b = LinearSort(a);
                 line.Out(string.Join(", ", b));
             }},
-            {"BMI Calculator", () => {
+            {"Max Func", () => {
                 UIWriter line = new UIWriter(ui);
-                line.Out("Enter height: ");
-                int height = line.Get();
-                line.Out("Enter weight: ");
-                int weight = line.Get();
-                line.Check("Your status: " + BMIcalculator(height, weight));
+                line.Out("Input array values seperated by enter: ");
+                int[] a = line.GetList();
+                int b = MaxFunc(a);
+                line.Check(a[0] + " is the maximum");
             }},
-            {"Tax Calculator", () => {
+            {"Min Func", () => {
                 UIWriter line = new UIWriter(ui);
-                line.Out("Enter income: ");
-                int income = line.Get();
-                line.Check("Your tax is 0");
+                line.Out("Input array values seperated by enter: ");
+                int[] a = line.GetList();
+                int b = MinFunc(a);
+                line.Check(a[0] + " is the minimum");
             }},
-            {"ATAR Calculator", () => {
-                UIWriter line = new UIWriter(ui);
-                line.Out("Enter your rank: ");
-                int atar = line.Get();
-                line.Check("Your estimated ATAR is ? mark");
-            }}
         };
     }
 
@@ -251,6 +235,84 @@ public class Algorithms
         return sortedArray;
     }
 
+    // currently NO implementation
+    public static int[] LinearSort(int[] unsortedArray)
+    {
+        return unsortedArray.Reverse().ToArray();
+    }
+
+    public static int MaxFunc(int[] numArray)
+    {
+        if (numArray.Length == 0) return 0;
+        int max = 0;
+        for (int i = 1; i < numArray.Length; i++)
+        {
+            if (numArray[i] > max)
+            {
+                max = numArray[i];
+            }
+        }
+        return numArray[0];
+    }
+
+    public static int MinFunc(int[] numArray)
+    {
+        if (numArray.Length == 0) return 0;
+        int min = 0;
+        for (int i = 1; i < numArray.Length; i++)
+        {
+            if (numArray[i] < min)
+            {
+                min = numArray[i];
+            }
+        }
+        return numArray[0];
+    }
+
+    // self driving cars so cool
+    void SelfDrivingCars()
+    {
+        if (GoingToCrash())
+        {
+            Dont();
+        }
+    }
+
+    bool GoingToCrash() { return Maybe; }
+    void Dont() { }
+
+    bool Maybe = false;
+}
+
+public class Calculators
+{
+    public static Dictionary<string, Action> CalculatorsPage(UI ui)
+    {
+        return new Dictionary<string, Action>
+        {
+            {"BMI Calculator", () => {
+                UIWriter line = new UIWriter(ui);
+                line.Out("Enter height: ");
+                int height = line.Get();
+                line.Out("Enter weight: ");
+                int weight = line.Get();
+                line.Check("Your status: " + BMIcalculator(height, weight));
+            }},
+            {"Tax Calculator", () => {
+                UIWriter line = new UIWriter(ui);
+                line.Out("Enter income: ");
+                int income = line.Get();
+                line.Check("Your tax is 0");
+            }},
+            {"ATAR Calculator", () => {
+                UIWriter line = new UIWriter(ui);
+                line.Out("Enter your rank: ");
+                int atar = line.Get();
+                line.Check("Your estimated ATAR is ? mark");
+            }},
+        };
+    }
+
     public static string BMIcalculator(int height, int weight)
     {
         int bmi = Operations.DivideFunc(weight, Operations.MultiplyFunc(height, height));
@@ -272,24 +334,4 @@ public class Algorithms
             return "Fat";
         }
     }
-
-    // currently NO implementation
-    public static int[] LinearSort(int[] unsortedArray)
-    {
-        return unsortedArray.Reverse().ToArray();
-    }
-
-    // self driving cars so cool
-    void SelfDrivingCars()
-    {
-        if (GoingToCrash())
-        {
-            Dont();
-        }
-    }
-
-    bool GoingToCrash() { return Maybe; }
-    void Dont() { }
-
-    bool Maybe = false;
 }
