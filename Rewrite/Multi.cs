@@ -36,7 +36,7 @@ public class Multi
         int result = Intro();
 
         // main page
-        UI ui = new UI("Multi", 3);
+        UI ui = new UI("Multi", 3, new UIDisplayExplorer());
 
         Options mainOptions = new Options { titleColour = ConsoleColor.Cyan, HasBackButton = false };
         Options pageOptions = new Options { titleColour = ConsoleColor.Red };
@@ -302,13 +302,13 @@ public class Calculators
                 UIWriter line = new UIWriter(ui);
                 line.Out("Enter income: ");
                 int income = line.Get();
-                line.Check("Your tax is 0");
+                line.Check("Your tax is " + TaxCalculator(income));
             }},
             {"ATAR Calculator", () => {
                 UIWriter line = new UIWriter(ui);
                 line.Out("Enter your rank: ");
                 int atar = line.Get();
-                line.Check("Your estimated ATAR is ? mark");
+                line.Check("Your estimated ATAR is "+ATARCalculator(atar)+" mark");
             }},
         };
     }
@@ -333,5 +333,15 @@ public class Calculators
         {
             return "Fat";
         }
+    }
+
+    public static int TaxCalculator(int income)
+    {
+        return 0;
+    }
+
+    public static string ATARCalculator(int atar)
+    {
+        return "?";
     }
 }

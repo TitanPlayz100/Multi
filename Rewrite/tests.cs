@@ -54,6 +54,8 @@ public class UnitTests
     {
         bool[] tests = new bool[] {
             Calculators.BMIcalculator(1, 1) == "Skinny",
+            Calculators.TaxCalculator(50000) == 1000,
+            Calculators.ATARCalculator(1) == "99.95"
         };
 
         // returns count of passed tests, and total tests in an array
