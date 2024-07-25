@@ -23,6 +23,8 @@ Do you trust my code? (Don't worry, it's not a virus. It's just *incredibly* use
 > Alternatively, you can run `.\compile.bat` in your terminal (confirm that you are in the correct directory).
 2. This creates `Multi.exe`.
 
+> Intellisense with the `c#` extension only works with .NET, so initialise a new project using `dotnet` command
+
 
 ## Project Documentation
 
