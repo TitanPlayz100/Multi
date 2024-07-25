@@ -62,7 +62,7 @@ public class UI
 
         if (!Pages.ContainsKey(Page))
         {
-            throw new Exception("Page does not exist");
+            throw new Exception("Page "+ Page +" does not exist");
         }
 
         currentPage = Pages[Page];
@@ -276,8 +276,14 @@ public class UIWriter
 
         ui.Style.ClearPage(ui, ui.OpenPages.Count);
 
-
         ui.currentPage.selections[selection].function();
+        if (ui.OpenPages.Contains("function"))
+        {
+            UIWriter line = new UIWriter(ui, Console.WindowHeight - 3);
+            line.Out("Press any key...", ConsoleColor.Red);
+            line.Get();
+        }
+
         if (!ui.Ended) ui.Style.NavigateBackPage(ui, ui.currentPage.name);
     }
 

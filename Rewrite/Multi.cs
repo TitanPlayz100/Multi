@@ -36,7 +36,7 @@ public class Multi
         int result = Intro();
 
         // main page
-        UI ui = new UI("Multi", 3, new UIDisplayExplorer());
+        UI ui = new UI("Multi", 3, new UIDisplayDefault());
 
         Options mainOptions = new Options { titleColour = ConsoleColor.Cyan, HasBackButton = false };
         Options pageOptions = new Options { titleColour = ConsoleColor.Red };
@@ -46,7 +46,9 @@ public class Multi
             {"Exit", () => { Console.Clear(); Environment.Exit(0); }},
             {"Mathematical Operations", () => { ui.NavigatePage("Mathematical Operations"); }},
             {"Algorithms", () => { ui.NavigatePage("Algorithms"); }},
-            {"Calculators", () => { ui.NavigatePage("Calculators"); }}
+            {"Calculators", () => { ui.NavigatePage("Calculators"); }},
+            {"Styles", () => { ui.NavigatePage("Styles"); }},
+            {"Page test", () => { ui.NavigatePage("page1"); }}
         };
         ui.CreatePage("Home", selections, mainOptions);
 
@@ -58,6 +60,11 @@ public class Multi
 
         // calculators page
         ui.CreatePage("Calculators", Calculators.CalculatorsPage(ui), pageOptions);
+
+        ui.CreatePage("Styles", new Dictionary<string, Action>{
+            {"Type 1", () => { ui.Style = new UIDisplayDefault(); ui.OpenPages.Clear(); ui.NavigatePage("Home"); } },
+            {"Type 2", () => { ui.Style = new UIDisplayExplorer(); ui.NavigatePage("Home"); } }
+        }, pageOptions);
 
         // show result and open first page
         string res = result == int.MinValue ? "Invalid input." : result.ToString();

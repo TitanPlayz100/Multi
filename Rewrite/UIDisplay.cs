@@ -29,6 +29,7 @@ public class UIDisplayDefault : IDisplay
             index++;
         }
         ChangeOtherCols(ui, Page);
+        line.Select();
     }
 
     public void NavigateBackPage(UI ui, string Page)
@@ -43,6 +44,7 @@ public class UIDisplayDefault : IDisplay
         UIWriter line = new UIWriter(ui);
         line.Out("<- " + ui.Pages[Page].name + " ->", ui.Pages[Page].options.titleColour);
         ChangeOtherCols(ui, Page);
+        line.Select();
     }
 
     public void ClearPage(UI ui, int? col = null)
